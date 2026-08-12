@@ -1,0 +1,19 @@
+CC = gcc
+CFLAGS = -Wall
+
+all: main_loop keyboard_input
+
+main_loop: main_loop.c
+	$(CC) $(CFLAGS) main_loop.c -o main_loop
+
+keyboard_input: keyboard_input.c
+	$(CC) $(CFLAGS) keyboard_input.c -o keyboard_input
+
+run1: main_loop
+	./main_loop
+
+run2: keyboard_input
+	./keyboard_input
+
+clean:
+	rm -f main_loop keyboard_input

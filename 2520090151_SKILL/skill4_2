@@ -1,0 +1,185 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_TOKENS 50
+#define MAX_TOKEN_LENGTH 50
+
+typedef struct
+{
+    char value[MAX_TOKEN_LENGTH];
+} Token;
+
+typedef struct
+{
+    char command[MAX_TOKEN_LENGTH];
+    char arguments[MAX_TOKENS][MAX_TOKEN_LENGTH];
+    int argument_count;
+} Command;
+
+void print_parse_tree(Command commands[], int command_count)
+{
+    printf("\n--- Parse Tree ---\n");
+
+    printf("PIPELINE\n");
+
+    for (int i = 0; i < command_count; i++)
+    {
+        printf("  |\n");
+        printf("  +-- COMMAND: %s\n", commands[i].command);
+
+        for (int j = 0; j < commands[i].argument_count; j++)
+        {
+            printf("      +-- ARGUMENT: %s\n",
+                   commands[i].arguments[j]);
+        }
+    }
+}
+
+int parse(Token tokens[], int count,
+          Command commands[], int *command_count)
+{
+    if (count == 0)
+    {
+        printf("Syntax Error: Empty command.\n");
+        return 0;
+    }
+
+    int command_index = 0;
+    int argument_index = 0;
+
+    /* First token must not be a pipe */
+    if (strcmp(tokens[0].value, "|") == 0)
+    {
+        printf("Syntax Error: Command cannot start with '|'.\n");
+        return 0;
+    }
+
+    strcpy(commands[command_index].command,
+           tokens[0].value);
+
+    for (int i = 1; i < count; i++)
+    {
+        if (strcmp(tokens[i].value, "|") == 0)
+        {
+            /* Pipe cannot appear twice */
+            if (i == count - 1 ||
+                strcmp(tokens[i + 1].value, "|") == 0)
+            {
+                printf("Syntax Error: Invalid pipe usage.\n");
+                return 0;
+            }
+
+            commands[command_index].argument_count =
+                argument_index;
+
+            command_index++;
+
+            if (command_index >= MAX_TOKENS)
+            {
+                printf("Too many commands.\n");
+                return 0;
+            }
+
+            strcpy(commands[command_index].command,
+                   tokens[i + 1].value);
+
+            argument_index = 0;
+
+            i++;
+        }
+        else
+        {
+            if (argument_index >= MAX_TOKENS)
+            {
+                printf("Too many arguments.\n");
+                return 0;
+            }
+
+            strcpy(commands[command_index]
+                       .arguments[argument_index],
+                   tokens[i].value);
+
+            argument_index++;
+        }
+    }
+
+    commands[command_index].argument_count =
+        argument_index;
+
+    *command_count = command_index + 1;
+
+    return 1;
+}
+
+int main()
+{
+    char input[500];
+    Token tokens[MAX_TOKENS];
+    Command commands[MAX_TOKENS];
+
+    printf("Enter command pipeline: ");
+    fgets(input, sizeof(input), stdin);
+
+    input[strcspn(input, "\n")] = '\0';
+
+    /* Handle empty command */
+    if (strlen(input) == 0)
+    {
+        printf("Empty command detected.\n");
+        return 0;
+    }
+
+    /* Tokenize using whitespace and pipe */
+    int token_count = 0;
+
+    char *token = strtok(input, " \t|");
+
+    while (token != NULL && token_count < MAX_TOKENS)
+    {
+        strcpy(tokens[token_count].value, token);
+        token_count++;
+
+        token = strtok(NULL, " \t|");
+    }
+
+    printf("\nTokens:\n");
+
+    for (int i = 0; i < token_count; i++)
+    {
+        printf("%d: %s\n",
+               i + 1,
+               tokens[i].value);
+    }
+
+    int command_count = 0;
+
+    if (parse(tokens, token_count,
+              commands, &command_count))
+    {
+        printf("\nSyntax validation successful.\n");
+
+        printf("\nExecution Structure:\n");
+
+        for (int i = 0; i < command_count; i++)
+        {
+            printf("Command %d: %s",
+                   i + 1,
+                   commands[i].command);
+
+            for (int j = 0;
+                 j < commands[i].argument_count;
+                 j++)
+            {
+                printf(" %s",
+                       commands[i].arguments[j]);
+            }
+
+            printf("\n");
+        }
+
+        print_parse_tree(commands, command_count);
+    }
+
+    return 0;
+}

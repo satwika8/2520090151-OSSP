@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define FIFO1 "client_to_server"
+#define FIFO2 "server_to_client"
+#define SIZE 100
+
+int main()
+{
+    char message[SIZE];
+    char response[SIZE];
+
+    printf("Enter message for server: ");
+    fgets(message, sizeof(message), stdin);
+
+    /* Open FIFO for writing */
+    int write_fd = open(FIFO1, O_WRONLY);
+
+    if (write_fd == -1)
+    {
+        perror("open");
+        return 1;
+    }
+
+    /* Send message */
+    write(write_fd, message, strlen(message) + 1);
+
+    close(write_fd);
+
+    /* Open FIFO for reading */
+    int read_fd = open(FIFO2, O_RDONLY);
+
+    if (read_fd == -1)
+    {
+        perror("open");
+        return 1;
+    }
+
+    /* Receive response */
+    read(read_fd, response, sizeof(response));
+
+    printf("Server response: %s\n", response);
+
+    close(read_fd);
+
+    return 0;
+}

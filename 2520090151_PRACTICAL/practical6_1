@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+#define FIFO1 "client_to_server"
+#define FIFO2 "server_to_client"
+#define SIZE 100
+
+int main()
+{
+    char message[SIZE];
+    char response[SIZE];
+
+    /* Create named pipes */
+    mkfifo(FIFO1, 0666);
+    mkfifo(FIFO2, 0666);
+
+    printf("Server started. Waiting for client...\n");
+
+    /* Open FIFO for reading */
+    int read_fd = open(FIFO1, O_RDONLY);
+
+    if (read_fd == -1)
+    {
+        perror("open");
+        return 1;
+    }
+
+    /* Read message from client */
+    read(read_fd, message, sizeof(message));
+    message[strcspn(message, "\n")] = '\0';
+
+    printf("Server received: %s\n", message);
+
+    /* Process message */
+    snprintf(response, sizeof(response),
+             "Server processed your message: %s", message);
+
+    close(read_fd);
+
+    /* Open FIFO for writing */
+    int write_fd = open(FIFO2, O_WRONLY);
+
+    if (write_fd == -1)
+    {
+        perror("open");
+        return 1;
+    }
+
+    /* Send response */
+    write(write_fd, response, strlen(response) + 1);
+
+    printf("Response sent to client.\n");
+
+    close(write_fd);
+
+    /* Remove FIFOs */
+    unlink(FIFO1);
+    unlink(FIFO2);
+
+    return 0;
+}

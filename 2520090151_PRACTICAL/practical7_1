@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int global_var = 100;
+int global_uninitialized;
+
+void display() {
+    int local_var = 10;
+
+    printf("\nProcess ID: %d\n", getpid());
+
+    printf("\nMemory Addresses:\n");
+
+    printf("Code address              : %p\n", (void *)display);
+    printf("Global variable address   : %p\n", (void *)&global_var);
+    printf("Global uninitialized addr : %p\n", (void *)&global_uninitialized);
+
+    static int static_var = 20;
+    printf("Static variable address   : %p\n", (void *)&static_var);
+
+    int *heap_var = (int *)malloc(sizeof(int));
+    *heap_var = 30;
+    printf("Heap variable address     : %p\n", (void *)heap_var);
+
+    printf("Stack variable address    : %p\n", (void *)&local_var);
+
+    free(heap_var);
+
+    printf("\nProcess is running...\n");
+    printf("Press Ctrl+C to stop.\n");
+
+    while (1) {
+        sleep(5);
+    }
+}
+
+int main() {
+    display();
+    return 0;
+}

@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+int main() {
+    FILE *source, *destination;
+    char buffer[1024];
+    size_t bytes;
+
+    source = fopen("input.txt", "r");
+
+    if (source == NULL) {
+        perror("Error opening input file");
+        return 1;
+    }
+
+    destination = fopen("library_output.txt", "w");
+
+    if (destination == NULL) {
+        perror("Error opening output file");
+        fclose(source);
+        return 1;
+    }
+
+    while ((bytes = fread(buffer, 1, sizeof(buffer), source)) > 0) {
+        fwrite(buffer, 1, bytes, destination);
+    }
+
+    fclose(source);
+    fclose(destination);
+
+    printf("File copied successfully using standard library functions.\n");
+
+    return 0;
+}

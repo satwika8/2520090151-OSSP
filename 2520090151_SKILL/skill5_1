@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char input[200];
+    char stored[200];
+
+    printf("Single Quote Parser\n");
+    printf("Enter text using single quotes: ");
+
+    fgets(input, sizeof(input), stdin);
+
+    input[strcspn(input, "\n")] = '\0';
+
+    if (input[0] == '\'' &&
+        input[strlen(input) - 1] == '\'') {
+
+        strcpy(stored, input);
+
+        printf("\nInput : %s\n", input);
+        printf("Stored: %s\n", stored);
+        printf("Single quotes preserve the content literally.\n");
+        printf("Variable expansion is ignored inside single quotes.\n");
+
+    } else {
+        printf("\nError: Text must begin and end with single quotes.\n");
+    }
+
+    return 0;
+}

@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main() {
+    char input[200];
+    char stored[200];
+
+    printf("Double Quote Parser\n");
+    printf("Enter text using double quotes: ");
+
+    fgets(input, sizeof(input), stdin);
+
+    input[strcspn(input, "\n")] = '\0';
+
+    if (input[0] == '"' &&
+        input[strlen(input) - 1] == '"') {
+
+        strcpy(stored, input);
+
+        printf("\nInput : %s\n", input);
+        printf("Stored: %s\n", stored);
+
+        printf("\nDouble quotes preserve spaces.\n");
+        printf("Variable expansion is allowed inside double quotes.\n");
+
+    } else {
+        printf("\nError: Text must begin and end with double quotes.\n");
+    }
+
+    return 0;
+}

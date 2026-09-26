@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+void pwd_command(char *arg) {
+    char path[500];
+
+    if (getcwd(path, sizeof(path)) != NULL)
+        printf("%s\n", path);
+}
+
+void cd_command(char *arg) {
+    if (arg == NULL) {
+        printf("cd: missing argument\n");
+        return;
+    }
+
+    if (chdir(arg) != 0)
+        perror("cd");
+}
+
+void help_command(char *arg) {
+    printf("\nBuilt-in Commands:\n");
+    printf("pwd  - show current directory\n");
+    printf("cd   - change directory\n");
+    printf("help - show available commands\n");
+    printf("exit - exit shell\n");
+}
+
+void exit_command(char *arg) {
+    printf("Exiting shell...\n");
+    exit(0);
+}
+
+struct Builtin {
+    char *name;
+    void (*function)(char *);
+};
+
+int main() {
+
+    struct Builtin commands[] = {
+        {"pwd", pwd_command},
+        {"cd", cd_command},
+        {"help", help_command},
+        {"exit", exit_command}
+    };
+
+    int count = 4;
+    char input[200];
+
+    while (1) {
+
+        printf("myshell> ");
+
+        fgets(input, sizeof(input), stdin);
+        input[strcspn(input, "\n")] = '\0';
+
+        char *command = strtok(input, " ");
+        char *argument = strtok(NULL, " ");
+
+        if (command == NULL)
+            continue;
+
+        int found = 0;
+
+        for (int i = 0; i < count; i++) {
+
+            if (strcmp(command, commands[i].name) == 0) {
+                commands[i].function(argument);
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found)
+            printf("Invalid command: %s\n", command);
+    }
+
+    return 0;
+}

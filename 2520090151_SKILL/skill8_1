@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    char input[200];
+    char output[500];
+    int i = 0, j = 0;
+
+    printf("Variable Expansion\n");
+    printf("Enter text: ");
+    fgets(input, sizeof(input), stdin);
+
+    input[strcspn(input, "\n")] = '\0';
+
+    while (input[i] != '\0') {
+
+        if (input[i] == '$') {
+            char variable[100];
+            int k = 0;
+
+            i++;
+
+            while (input[i] != '\0' &&
+                   (input[i] == '_' ||
+                   (input[i] >= 'A' && input[i] <= 'Z') ||
+                   (input[i] >= 'a' && input[i] <= 'z') ||
+                   (input[i] >= '0' && input[i] <= '9')) &&
+                   k < 99) {
+
+                variable[k++] = input[i++];
+            }
+
+            variable[k] = '\0';
+
+            char *value = getenv(variable);
+
+            if (value != NULL) {
+                strcpy(&output[j], value);
+                j += strlen(value);
+            } else {
+                printf("Undefined variable: %s\n", variable);
+            }
+
+        } else {
+            output[j++] = input[i++];
+        }
+    }
+
+    output[j] = '\0';
+
+    printf("Expanded text: %s\n", output);
+
+    return 0;
+}

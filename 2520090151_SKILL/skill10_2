@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int valid_name(char *name) {
+    if (!isalpha(name[0]) && name[0] != '_')
+        return 0;
+
+    for (int i = 1; name[i] != '\0'; i++) {
+        if (!isalnum(name[i]) && name[i] != '_')
+            return 0;
+    }
+
+    return 1;
+}
+
+int main() {
+    char input[200];
+
+    printf("Export Environment Variable\n");
+
+    while (1) {
+        printf("myshell> ");
+
+        fgets(input, sizeof(input), stdin);
+        input[strcspn(input, "\n")] = '\0';
+
+        if (strcmp(input, "exit") == 0)
+            break;
+
+        if (strncmp(input, "export ", 7) == 0) {
+
+            char *assignment = input + 7;
+            char *equal = strchr(assignment, '=');
+
+            if (equal == NULL) {
+                printf("Error: Use export NAME=value\n");
+                continue;
+            }
+
+            *equal = '\0';
+
+            char *name = assignment;
+            char *value = equal + 1;
+
+            if (!valid_name(name)) {
+                printf("Invalid variable name.\n");
+                continue;
+            }
+
+            if (setenv(name, value, 1) != 0) {
+                perror("setenv");
+                continue;
+            }
+
+            printf("Exported: %s=%s\n", name, value);
+        }
+
+        else if (strncmp(input, "print ", 6) == 0) {
+
+            char *name = input + 6;
+            char *value = getenv(name);
+
+            if (value != NULL)
+                printf("%s=%s\n", name, value);
+            else
+                printf("Variable not found.\n");
+        }
+
+        else {
+            printf("Invalid command.\n");
+        }
+    }
+
+    printf("Shell exited.\n");
+
+    return 0;
+}

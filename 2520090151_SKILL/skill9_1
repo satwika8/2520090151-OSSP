@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <limits.h>
+
+int main() {
+    char input[200];
+    char previous[PATH_MAX];
+    char current[PATH_MAX];
+
+    if (getcwd(previous, sizeof(previous)) == NULL) {
+        perror("getcwd");
+        return 1;
+    }
+
+    printf("Directory Navigation\n");
+
+    while (1) {
+        if (getcwd(current, sizeof(current)) == NULL) {
+            perror("getcwd");
+            break;
+        }
+
+        printf("\nCurrent directory: %s\n", current);
+        printf("Enter command (cd <path>, cd -, pwd, exit): ");
+
+        fgets(input, sizeof(input), stdin);
+        input[strcspn(input, "\n")] = '\0';
+
+        if (strcmp(input, "exit") == 0) {
+            break;
+        }
+
+        if (strcmp(input, "pwd") == 0) {
+            printf("Working directory: %s\n", current);
+        }
+
+        else if (strcmp(input, "cd -") == 0) {
+            char temp[PATH_MAX];
+
+            strcpy(temp, current);
+
+            if (chdir(previous) == 0) {
+                strcpy(previous, temp);
+            } else {
+                perror("cd");
+            }
+        }
+
+        else if (strncmp(input, "cd ", 3) == 0) {
+            char path[PATH_MAX];
+
+            strcpy(path, input + 3);
+
+            if (chdir(path) == 0) {
+                strcpy(previous, current);
+                printf("Directory changed successfully.\n");
+            } else {
+                perror("cd");
+            }
+        }
+
+        else {
+            printf("Invalid command.\n");
+        }
+    }
+
+    return 0;
+}

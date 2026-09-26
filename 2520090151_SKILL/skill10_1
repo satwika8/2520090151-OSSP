@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <limits.h>
+
+int main() {
+    char current[PATH_MAX];
+    char input[100];
+
+    if (getcwd(current, sizeof(current)) == NULL) {
+        perror("getcwd");
+        return 1;
+    }
+
+    printf("Simple Shell\n");
+
+    while (1) {
+        printf("myshell> ");
+
+        if (fgets(input, sizeof(input), stdin) == NULL)
+            break;
+
+        input[strcspn(input, "\n")] = '\0';
+
+        if (strcmp(input, "pwd") == 0) {
+
+            if (getcwd(current, sizeof(current)) != NULL)
+                printf("Current directory: %s\n", current);
+            else
+                perror("getcwd");
+
+        }
+
+        else if (strcmp(input, "exit") == 0) {
+            printf("Saving state...\n");
+            printf("Cleaning up resources...\n");
+            printf("Shell exited successfully.\n");
+            break;
+        }
+
+        else if (strlen(input) == 0) {
+            continue;
+        }
+
+        else {
+            printf("Invalid command.\n");
+        }
+    }
+
+    return 0;
+}
